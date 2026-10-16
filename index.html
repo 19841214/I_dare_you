@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>青年百億海外圓夢計畫 15 分鐘通關全攻略</title>
+    <style>
+        :root {
+            --bg-color: #070a10;
+            --bg-gradient: radial-gradient(circle at 50% 50%, #111b2b 0%, #070a10 82%);
+            --grid-line: rgba(34, 211, 238, 0.05);
+            --card-bg: rgba(13, 19, 31, 0.96);
+            --card-leaf-bg: rgba(14, 21, 34, 0.97);
+            --root-bg: linear-gradient(145deg, #162338, #0c1320);
+            --pod-bg: rgba(8, 13, 22, 0.78);
+            --bullet-bg: rgba(30, 41, 59, 0.55);
+            --card-border: rgba(34, 211, 238, 0.34);
+            --primary-neon: #22d3ee;
+            --primary-glow: rgba(34, 211, 238, 0.42);
+            --gold-accent: #facc15;
+            --gold-glow: rgba(250, 204, 21, 0.42);
+            --emerald-accent: #10b981;
+            --purple-accent: #c084fc;
+            --text-main: #f8fafc;
+            --text-muted: #e2e8f0;
+            --danger-neon: #f43f5e;
+            --hud-bg: rgba(13, 19, 30, 0.93);
+            --modal-bg: #0f1724;
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', sans-serif;
+        }
+
+        /* High-Contrast Daylight Theme for Bright Classrooms (Toggle with 'T') */
+        body.light-theme {
+            --bg-color: #f1f5f9;
+            --bg-gradient: radial-gradient(circle at 50% 50%, #ffffff 0%, #e2e8f0 85%);
+            --grid-line: rgba(2, 132, 199, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --card-leaf-bg: rgba(255, 255, 255, 0.98);
+            --root-bg: linear-gradient(145deg, #ffffff, #f0f9ff);
+            --pod-bg: rgba(241, 245, 249, 0.92);
+            --bullet-bg: rgba(226, 232, 240, 0.65);
+            --card-border: rgba(2, 132, 199, 0.42);
+            --primary-neon: #0284c7;
+            --primary-glow: rgba(2, 132, 199, 0.25);
+            --gold-accent: #d97706;
+            --gold-glow: rgba(217, 119, 6, 0.25);
+            --emerald-accent: #059669;
+            --purple-accent: #7c3aed;
+            --text-main: #0f172a;
+            --text-muted: #1e293b;
+            --danger-neon: #e11d48;
+            --hud-bg: rgba(255, 255, 255, 0.95);
+            --modal-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            touch-action: none;
+        }
+
+        #viewport {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-gradient);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            perspective: 1800px;
+        }
+        #viewport.dragging {
+            cursor: grabbing;
+        }
+        body.laser-mode #viewport,
+        body.laser-mode .node {
+            cursor: none !important;
+        }
+
+        #canvas {
+            width: 8000px;
+            height: 6000px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+        /* Ambient grid pattern */
+        #canvas::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(var(--grid-line) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, var(--grid-line) 1.5px, transparent 1.5px);
+            background-size: 120px 120px;
+            pointer-events: none;
+        }
+
+        /* SVG Mind Map Network Layer */
+        #network-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8000px;
+            height: 6000px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes dashFlow {
+            from { stroke-dashoffset: 88; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        .net-line-root {
+            stroke: var(--gold-accent);
+            stroke-width: 4.5px;
+            stroke-dasharray: 14 8;
+            stroke-linecap: round;
+            opacity: 0.6;
+            fill: none;
+            animation: dashFlow 3s linear infinite;
+            filter: drop-shadow(0 0 8px var(--gold-glow));
+            transition: stroke-width 0.3s ease, opacity 0.3s ease;
+        }
+
+        .net-line-branch {
+            stroke: var(--primary-neon);
+            stroke-width: 3.4px;
+            stroke-dasharray: 10 7;
+            stroke-linecap: round;
+            opacity: 0.52;
+            fill: none;
+            animation: dashFlow 2.4s linear infinite;
+            filter: drop-shadow(0 0 6px var(--primary-glow));
+            transition: stroke-width 0.3s ease, opacity 0.3s ease;
+        }
+
+        .net-node-anchor {
+            fill: var(--card-bg);
+            stroke-width: 3.5px;
+            transition: all 0.3s ease;
+        }
+
+        .net-line-active {
+            opacity: 1 !important;
+            stroke-width: 8px !important;
+            filter: drop-shadow(0 0 22px var(--primary-neon)) !important;
+        }
+
+        .net-anchor-active {
+            r: 15px !important;
+            stroke-width: 5px !important;
+            filter: drop-shadow(0 0 18px var(--gold-accent)) !important;
+        }
+
+        #photon-comet {
+            fill: #ffffff;
+            stroke: var(--gold-accent);
+            stroke-width: 5px;
+            filter: drop-shadow(0 0 24px #facc15) drop-shadow(0 0 42px #22d3ee);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* SVG Illustration Internal Animations */
+        @keyframes svgSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes svgSpinRev {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        @keyframes svgPulse {
+            0%, 100% { transform: scale(1); opacity: 0.88; }
+            50% { transform: scale(1.07); opacity: 1; }
+        }
+        @keyframes svgFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-7px); }
+        }
+        @keyframes svgScanY {
+            0%, 100% { transform: translateY(-42px); opacity: 0.35; }
+            50% { transform: translateY(42px); opacity: 0.95; }
+        }
+
+        .svg-spin {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: svgSpin 18s linear infinite;
+        }
+        .svg-spin-rev {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: svgSpinRev 14s linear infinite;
+        }
+        .svg-pulse {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: svgPulse 3.2s ease-in-out infinite;
+        }
+        .svg-float {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: svgFloat 3.6s ease-in-out infinite;
+        }
+        .svg-scan {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: svgScanY 2.8s ease-in-out infinite;
+        }
+        .svg-dash {
+            stroke-dasharray: 8 5;
+            animation: dashFlow 2.2s linear infinite;
+        }
+
+        /* Top Chapter Breadcrumb & Quick-Jump Bar */
+        #chapter-bar {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 95vw;
+            overflow-x: auto;
+            background: var(--hud-bg);
+            backdrop-filter: blur(14px);
+            padding: 7px 14px;
+            border-radius: 36px;
+            border: 1.5px solid var(--card-border);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+            transition: opacity 0.3s ease, background 0.3s ease;
+            scrollbar-width: none;
+        }
+        #chapter-bar::-webkit-scrollbar { display: none; }
+        #chapter-bar.hidden { opacity: 0; pointer-events: none; }
+
+        .chapter-pill {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .chapter-pill:hover {
+            color: var(--primary-neon);
+            background: rgba(34, 211, 238, 0.14);
+        }
+        .chapter-pill.active {
+            background: rgba(250, 204, 21, 0.2);
+            color: var(--gold-accent);
+            border-color: rgba(250, 204, 21, 0.55);
+            box-shadow: 0 0 14px var(--gold-glow);
+        }
+
+        /* 16:9 Full-Viewport Stage Cards (v5.0 Auditorium Spec) */
+        .node {
+            position: absolute;
+            transform: translate(-50%, -50%) translateZ(0);
+            will-change: transform, box-shadow;
+            cursor: pointer;
+            z-index: 2;
+            transition: box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .node.root {
+            width: 1180px;
+            min-height: 640px;
+            padding: 2.8rem 3.2rem;
+            background: var(--root-bg);
+            border: 3.5px solid var(--gold-accent);
+            border-radius: 38px;
+            box-shadow: 0 18px 65px var(--gold-glow);
+        }
+
+        .node.part {
+            width: 1080px;
+            min-height: 580px;
+            padding: 2.5rem 2.8rem;
+            background: var(--card-bg);
+            border: 3px solid var(--primary-neon);
+            border-radius: 34px;
+            box-shadow: 0 14px 48px var(--primary-glow);
+        }
+
+        .node.leaf {
+            width: 980px;
+            min-height: 530px;
+            padding: 2.3rem 2.6rem;
+            background: var(--card-leaf-bg);
+            backdrop-filter: blur(14px);
+            border: 2.5px solid var(--card-border);
+            border-radius: 30px;
+            box-shadow: 0 12px 38px rgba(0, 0, 0, 0.42);
+        }
+
+        /* Dual-Column 60/40 Split Grid Inside Every Card */
+        .node-split-grid {
+            display: grid;
+            grid-template-columns: 1.46fr 1fr;
+            gap: 32px;
+            align-items: stretch;
+            width: 100%;
+            height: 100%;
+        }
+
+        .node-left-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 16px;
+            text-align: left;
+            min-width: 0;
+        }
+
+        .node-header-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .node-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 18px;
+            background: rgba(34, 211, 238, 0.16);
+            color: var(--primary-neon);
+            border-radius: 24px;
+            font-size: 1.18rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            border: 1.5px solid var(--card-border);
+        }
+        .node.root .node-badge-pill {
+            background: rgba(250, 204, 21, 0.18);
+            color: var(--gold-accent);
+            border-color: rgba(250, 204, 21, 0.48);
+            font-size: 1.25rem;
+        }
+
+        /* Back-Row Auditorium Giant Headlines (46pt ~ 58pt equivalent) */
+        .node.root h1 {
+            font-size: 3.15rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            letter-spacing: 0.8px;
+            line-height: 1.22;
+        }
+        .node.part h2 {
+            font-size: 2.7rem;
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+            line-height: 1.24;
+        }
+        .node.leaf h3 {
+            font-size: 2.45rem;
+            font-weight: 900;
+            color: var(--primary-neon);
+            letter-spacing: 0.4px;
+            line-height: 1.25;
+        }
+
+        .node-subtitle {
+            font-size: 1.48rem;
+            color: var(--gold-accent);
+            font-weight: 800;
+            line-height: 1.35;
+        }
+        .node.root .node-subtitle {
+            color: var(--primary-neon);
+            font-size: 1.58rem;
+        }
+
+        .node-desc-text {
+            font-size: 1.48rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            line-height: 1.5;
+            background: var(--bullet-bg);
+            padding: 14px 20px;
+            border-radius: 16px;
+            border-left: 5px solid var(--primary-neon);
+        }
+
+        /* Spacious Card-in-Card Bullets for Back-Row Visibility (28pt ~ 34pt Bold) */
+        .node-bullets {
+            list-style: none;
+            margin: 4px 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+        .node-bullets li {
+            position: relative;
+            padding: 13px 18px 13px 44px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.42;
+            background: var(--bullet-bg);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-left: 5px solid var(--gold-accent);
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        }
+        .node.typo-xl .node-bullets li {
+            font-size: 1.66rem;
+            padding: 15px 20px 15px 48px;
+        }
+        .node-bullets li::before {
+            content: '✦';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gold-accent);
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+        .bullet-lead {
+            color: var(--gold-accent);
+            font-weight: 900;
+            margin-right: 6px;
+        }
+        .node.leaf .bullet-lead {
+            color: var(--primary-neon);
+        }
+
+        .leaf-highlight {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(250, 204, 21, 0.15);
+            color: var(--gold-accent);
+            border-radius: 16px;
+            font-size: 1.32rem;
+            font-weight: 800;
+            border: 1.5px solid rgba(250, 204, 21, 0.45);
+            align-self: flex-start;
+        }
+
+        /* Right Column: Animated SVG Illustration Stage + Giant Metric Pod */
+        .node-right-pod {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--pod-bg);
+            border: 2px solid rgba(34, 211, 238, 0.25);
+            border-radius: 26px;
+            padding: 20px 20px 18px 20px;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .node.root .node-right-pod {
+            border-color: rgba(250, 204, 21, 0.38);
+        }
+
+        .svg-stage-box {
+            width: 100%;
+            flex: 1;
+            min-height: 225px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .svg-stage-box svg {
+            width: 100%;
+            max-width: 310px;
+            height: auto;
+            max-height: 245px;
+            overflow: visible;
+        }
+
+        .pod-metric-box {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.72);
+            border: 1.5px solid var(--card-border);
+            border-radius: 18px;
+            padding: 12px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        body.light-theme .pod-metric-box {
+            background: rgba(255, 255, 255, 0.92);
+        }
+        .pod-metric-val {
+            font-size: 2.35rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            letter-spacing: 1px;
+            line-height: 1.15;
+        }
+        .pod-metric-lbl {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--primary-neon);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        /* Active & Ancestor States + Staggered Inner-Card Arrival Choreography */
+        .node.ancestor-active {
+            border-color: var(--gold-accent) !important;
+            box-shadow: 0 0 45px var(--gold-glow) !important;
+            z-index: 6;
+        }
+
+        .node.active {
+            box-shadow: 0 0 75px var(--primary-glow), 0 0 0 4px var(--primary-neon) !important;
+            border-color: var(--primary-neon) !important;
+            z-index: 15;
+        }
+
+        @keyframes cardHeaderIn {
+            0% { opacity: 0.25; transform: translateY(16px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes cardPodPop {
+            0% { opacity: 0.2; transform: scale(0.86) translateY(14px); }
+            70% { opacity: 1; transform: scale(1.03) translateY(-2px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes bulletSlideIn {
+            0% { opacity: 0.15; transform: translateX(-24px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        .node.active .node-header-group {
+            animation: cardHeaderIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .node.active .node-right-pod {
+            animation: cardPodPop 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+        }
+        .node.active .node-bullets li:nth-child(1) {
+            animation: bulletSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+        }
+        .node.active .node-bullets li:nth-child(2) {
+            animation: bulletSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+        }
+        .node.active .node-bullets li:nth-child(3) {
+            animation: bulletSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.30s both;
+        }
+        .node.active .node-bullets li:nth-child(4) {
+            animation: bulletSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
+        }
+        .node.active .leaf-highlight,
+        .node.active .resource-links {
+            animation: cardHeaderIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.36s both;
+        }
+
+        /* External Resource Hyperlink Chips (Auditorium Sized) */
+        .resource-links {
+            margin-top: 6px;
+            padding-top: 12px;
+            border-top: 1.5px dashed rgba(148, 163, 184, 0.35);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: auto !important;
+            user-select: auto !important;
+        }
+        .res-label {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--gold-accent);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .res-chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .res-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 24px;
+            font-size: 1.08rem;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            z-index: 100;
+            pointer-events: auto !important;
+            font-family: inherit;
+        }
+        .res-chip .ext-arrow {
+            font-size: 1rem;
+            opacity: 0.85;
+            transition: transform 0.2s ease;
+        }
+        .res-chip:hover .ext-arrow {
+            transform: translate(3px, -2px);
+            opacity: 1;
+        }
+        .res-chip.video {
+            background: rgba(244, 63, 94, 0.18);
+            border: 2px solid rgba(244, 63, 94, 0.65);
+            color: var(--danger-neon);
+        }
+        body:not(.light-theme) .res-chip.video {
+            color: #fecdd3;
+        }
+        .res-chip.video:hover {
+            background: rgba(244, 63, 94, 0.9);
+            color: #ffffff;
+            box-shadow: 0 0 22px rgba(244, 63, 94, 0.7);
+            transform: translateY(-2px);
+        }
+        .res-chip.web {
+            background: rgba(34, 211, 238, 0.16);
+            border: 2px solid var(--card-border);
+            color: var(--primary-neon);
+        }
+        body:not(.light-theme) .res-chip.web {
+            color: #bae6fd;
+        }
+        .res-chip.web:hover {
+            background: var(--primary-neon);
+            color: #080b11;
+            box-shadow: 0 0 22px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Virtual Laser Pointer Dot */
+        #laser-dot {
+            position: fixed;
+            top: -100px;
+            left: -100px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ff1e42;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 20px 7px rgba(255, 30, 66, 0.9), 0 0 40px 14px rgba(255, 30, 66, 0.5);
+            pointer-events: none;
+            z-index: 5000;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        body.laser-mode #laser-dot {
+            display: block;
+        }
+
+        /* HUD controls */
+        #hud {
+            position: fixed;
+            bottom: 20px;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            background: var(--hud-bg);
+            backdrop-filter: blur(14px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1.5px solid var(--card-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: opacity 0.3s ease, background 0.3s ease;
+        }
+        #hud.hidden { opacity: 0; pointer-events: none; }
+        .hud-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.05rem;
+            padding: 6px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hud-btn:hover, .hud-btn.active-tool {
+            background: rgba(34, 211, 238, 0.18);
+            color: var(--primary-neon);
+            transform: scale(1.08);
+        }
+        .hud-btn-res {
+            background: rgba(244, 63, 94, 0.2);
+            border: 1.5px solid rgba(244, 63, 94, 0.55);
+            color: var(--danger-neon);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            gap: 6px;
+        }
+        body:not(.light-theme) .hud-btn-res {
+            color: #fda4af;
+        }
+        .hud-btn-res:hover {
+            background: rgba(244, 63, 94, 0.85);
+            color: #fff;
+            box-shadow: 0 0 18px rgba(244, 63, 94, 0.65);
+        }
+        .hud-info {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0 4px;
+            font-family: monospace;
+            font-weight: 800;
+        }
+
+        /* Intro Splash Screen */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(7, 10, 16, 0.92);
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+        #intro-overlay.hidden { opacity: 0; pointer-events: none; }
+        .start-btn {
+            padding: 18px 46px;
+            font-size: 1.42rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            color: #080b11;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 0 38px rgba(250, 204, 21, 0.55);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 60px rgba(250, 204, 21, 0.85);
+        }
+
+        /* Global Resources Modal & Video Lightbox Modal */
+        .zui-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(8, 11, 17, 0.84);
+            backdrop-filter: blur(12px);
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.28s ease;
+        }
+        .zui-modal-backdrop.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .res-modal-card {
+            width: 92%;
+            max-width: 900px;
+            max-height: 84vh;
+            background: var(--modal-bg);
+            border: 2px solid var(--primary-neon);
+            border-radius: 28px;
+            box-shadow: 0 0 60px rgba(34, 211, 238, 0.32);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .video-modal-card {
+            width: 92%;
+            max-width: 980px;
+            background: #090d14;
+            border: 2px solid var(--danger-neon);
+            border-radius: 24px;
+            box-shadow: 0 0 65px rgba(244, 63, 94, 0.45);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .res-modal-header {
+            padding: 1.2rem 1.8rem;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .res-modal-header h2 {
+            font-size: 1.35rem;
+            color: #facc15;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .res-modal-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+            padding: 4px 8px;
+        }
+        .res-modal-close:hover { color: #fff; }
+        .res-modal-notice {
+            padding: 0.75rem 1.8rem;
+            background: rgba(250, 204, 21, 0.1);
+            border-bottom: 1px solid rgba(250, 204, 21, 0.22);
+            font-size: 0.86rem;
+            color: var(--gold-accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .res-modal-content {
+            padding: 1.4rem 1.8rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .res-group-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary-neon);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 5px;
+        }
+        .res-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            gap: 12px;
+        }
+        .res-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden;
+        }
+        .res-item-title {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .res-item-url {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-family: monospace;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .res-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .res-action-btn {
+            padding: 6px 13px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: inherit;
+        }
+        .res-action-play {
+            background: rgba(244, 63, 94, 0.2);
+            border: 1px solid rgba(244, 63, 94, 0.55);
+            color: #fb7185;
+        }
+        .res-action-play:hover {
+            background: rgba(244, 63, 94, 0.85);
+            color: #fff;
+        }
+        .res-action-open {
+            background: rgba(34, 211, 238, 0.2);
+            border: 1px solid rgba(34, 211, 238, 0.5);
+            color: var(--primary-neon);
+        }
+        .res-action-open:hover {
+            background: var(--primary-neon);
+            color: #080b11;
+        }
+        .res-action-copy {
+            background: rgba(148, 163, 184, 0.15);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: var(--text-muted);
+        }
+        .res-action-copy:hover {
+            background: rgba(148, 163, 184, 0.35);
+            color: var(--text-main);
+        }
+
+        .video-iframe-wrap {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background: #000;
+        }
+        .video-iframe-wrap iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        #blackout {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 3000;
+            display: none;
+        }
+        #blackout.active { display: block; }
+
+        #toast {
+            position: fixed;
+            top: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.96);
+            border: 1.5px solid #facc15;
+            color: #facc15;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            z-index: 4000;
+            box-shadow: 0 0 25px rgba(250, 204, 21, 0.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div id="blackout"></div>
+    <div id="laser-dot"></div>
+    <div id="toast">已複製連結至剪貼簿！</div>
+
+    <div id="intro-overlay">
+        <div style="padding:6px 20px;border-radius:24px;background:rgba(34,211,238,0.16);border:1.5px solid rgba(34,211,238,0.45);color:#22d3ee;font-weight:800;font-size:1rem;margin-bottom:1.2rem;letter-spacing:1.5px;">
+            ZUI STAGE ENGINE v5.0 ｜ 大禮堂後排巨字 × 雙欄動態 SVG 插畫 × 電影運鏡
+        </div>
+        <h1 style="color: #facc15; font-size: 3.1rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 0 0 28px rgba(250, 204, 21, 0.5); text-align: center; max-width: 980px; padding: 0 1rem;">
+            青年百億海外圓夢計畫 15 分鐘通關全攻略
+        </h1>
+        <p style="color: #e2e8f0; font-size: 1.25rem; font-weight: 700; margin-bottom: 2.4rem; text-align: center; padding: 0 1rem;">
+            16:9 準全螢幕舞台大卡（92% 佔比）｜ 12 組語意動態 SVG 插畫 ｜ 60fps 拋物線光子運鏡
+        </p>
+        <button class="start-btn" onclick="startPresentation()">開啟大禮堂簡報 / 開始探索</button>
+    </div>
+
+    <!-- Top Chapter Quick-Jump Breadcrumb Bar -->
+    <div id="chapter-bar">
+        <button type="button" class="chapter-pill" data-part-idx="0" data-node-id="node-root" title="快速跳轉：青年百億海外圓夢 (快捷鍵 0)" onclick="jumpToNodeId('node-root')">0 核心主軸</button>
+<button type="button" class="chapter-pill" data-part-idx="1" data-node-id="node-part-1" title="快速跳轉：打破我不夠神心魔 (快捷鍵 1)" onclick="jumpToNodeId('node-part-1')">1 打破我不夠神心魔</button>
+<button type="button" class="chapter-pill" data-part-idx="2" data-node-id="node-part-2" title="快速跳轉：泰國孔敬大學科研實戰 (快捷鍵 2)" onclick="jumpToNodeId('node-part-2')">2 泰國孔敬大學科研實戰</button>
+<button type="button" class="chapter-pill" data-part-idx="3" data-node-id="node-part-3" title="快速跳轉：步步為營穩健通關 (快捷鍵 3)" onclick="jumpToNodeId('node-part-3')">3 步步為營穩健通關</button>
+<button type="button" class="chapter-pill" data-part-idx="4" data-node-id="node-part-4" title="快速跳轉：3秒解密厚重官方簡章 (快捷鍵 4)" onclick="jumpToNodeId('node-part-4')">4 3秒解密厚重官方簡章</button>
+<button type="button" class="chapter-pill" data-part-idx="5" data-node-id="node-part-5" title="快速跳轉：世界很大等你出發 (快捷鍵 5)" onclick="jumpToNodeId('node-part-5')">5 世界很大等你出發</button>
+    </div>
+
+    <!-- In-App YouTube & HTML5 Video Lightbox Modal -->
+    <div id="video-modal" class="zui-modal-backdrop hidden" onclick="if(event.target === this) closeVideoModal()">
+        <div class="video-modal-card">
+            <div class="res-modal-header">
+                <h2 id="video-modal-title">▶ 影片預覽</h2>
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;">
+                    <button type="button" id="video-modal-pip" class="res-action-btn res-action-play" style="background:rgba(250,204,21,0.22);border-color:#facc15;color:#facc15;" title="在簡報中央彈出獨立置頂 16:9 劇院小視窗">🪟 懸浮劇院視窗播放 (推薦)</button>
+                    <a id="video-modal-ext" href="#" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open">另開分頁 ↗</a>
+                    <button type="button" id="video-modal-copy" class="res-action-btn res-action-copy">複製網址 📋</button>
+                    <button type="button" class="res-modal-close" onclick="closeVideoModal()" title="關閉 (Esc)">✕</button>
+                </div>
+            </div>
+            <div id="video-sandbox-banner" class="res-modal-notice" style="display:none;justify-content:space-between;align-items:center;gap:12px;">
+                <span>⚠️ 偵測到目前為本機檔案 (file://) 或雲端沙盒環境，若下方內嵌畫面遭 YouTube 阻擋，請點擊右側按鈕以「置頂劇院小視窗」直接播放：</span>
+                <button type="button" id="video-banner-pip" class="res-action-btn res-action-play" style="background:#facc15;color:#080b11;border:none;font-weight:800;padding:6px 14px;flex-shrink:0;">🪟 立即彈出劇院小視窗 ▶</button>
+            </div>
+            <div class="video-iframe-wrap">
+                <iframe id="video-modal-iframe" src="" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                <video id="video-modal-native" controls style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;background:#000;"></video>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Resources Directory Modal -->
+    <div id="resources-modal" class="zui-modal-backdrop hidden" onclick="if(event.target === this) toggleResourcesModal()">
+        <div class="res-modal-card">
+            <div class="res-modal-header">
+                <h2>
+                    <svg style="width:22px;height:22px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                    外部影音與權威資源全覽
+                </h2>
+                <button class="res-modal-close" onclick="toggleResourcesModal()">✕</button>
+            </div>
+            <div class="res-modal-notice">
+                <span>💡 提示：點擊「▶ 內嵌播放」可直接在簡報中觀看影片；若受校園網路或雲端沙盒限制，可點擊「開啟 ↗」或「複製 📋」！</span>
+            </div>
+            <div class="res-modal-content">
+                <div class="res-group">
+            <div class="res-group-title"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg> 青年百億海外圓夢</div>
+            <div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>青年百億海外圓夢計畫官網</span>
+                    </div>
+                    <div class="res-item-url">https://twpathfinder.yda.gov.tw/</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://twpathfinder.yda.gov.tw/" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://twpathfinder.yda.gov.tw/');">複製 📋</button>
+                </div>
+            </div><div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>教育部青年發展署計畫說明</span>
+                    </div>
+                    <div class="res-item-url">https://www.yda.gov.tw/planList.aspx?uid=30329&amp;pid=83</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://www.yda.gov.tw/planList.aspx?uid=30329&amp;pid=83" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://www.yda.gov.tw/planList.aspx?uid=30329&amp;pid=83');">複製 📋</button>
+                </div>
+            </div>
+        </div>
+<div class="res-group">
+            <div class="res-group-title"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg> 打破我不夠神心魔</div>
+            <div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>青年百億海外圓夢計畫說明</span>
+                    </div>
+                    <div class="res-item-url">https://twpathfinder.yda.gov.tw/about</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://twpathfinder.yda.gov.tw/about" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://twpathfinder.yda.gov.tw/about');">複製 📋</button>
+                </div>
+            </div><div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>EF SET 官方線上免費測驗</span>
+                    </div>
+                    <div class="res-item-url">https://www.efset.org/zht/</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://www.efset.org/zht/" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://www.efset.org/zht/');">複製 📋</button>
+                </div>
+            </div>
+        </div>
+<div class="res-group">
+            <div class="res-group-title"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg> 泰國孔敬大學科研實戰</div>
+            <div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>海外翱翔組計畫簡介</span>
+                    </div>
+                    <div class="res-item-url">https://twpathfinder.yda.gov.tw/about_overseas</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://twpathfinder.yda.gov.tw/about_overseas" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://twpathfinder.yda.gov.tw/about_overseas');">複製 📋</button>
+                </div>
+            </div>
+        </div>
+<div class="res-group">
+            <div class="res-group-title"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg> 3秒解密厚重官方簡章</div>
+            <div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>NotebookLM 官方工具</span>
+                    </div>
+                    <div class="res-item-url">https://notebooklm.google.com/</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://notebooklm.google.com/');">複製 📋</button>
+                </div>
+            </div>
+        </div>
+<div class="res-group">
+            <div class="res-group-title"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg> 世界很大等你出發</div>
+            <div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>青年百億海外圓夢計畫首頁</span>
+                    </div>
+                    <div class="res-item-url">https://twpathfinder.yda.gov.tw/</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://twpathfinder.yda.gov.tw/" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://twpathfinder.yda.gov.tw/');">複製 📋</button>
+                </div>
+            </div><div class="res-item-row">
+                <div class="res-item-info">
+                    <div class="res-item-title">
+                        <span style="background:#38bdf822;color:#38bdf8;border:1px solid #38bdf855;border-radius:12px;padding:1px 8px;font-size:0.75rem;">🌐 官網/文獻</span>
+                        <span>EF SET 免費線上英文檢定</span>
+                    </div>
+                    <div class="res-item-url">https://www.efset.org/zht/</div>
+                </div>
+                <div class="res-item-actions">
+                    
+                    <a href="https://www.efset.org/zht/" target="_blank" rel="noopener noreferrer" class="res-action-btn res-action-open" onclick="event.stopPropagation();">開啟 ↗</a>
+                    <button type="button" class="res-action-btn res-action-copy" onclick="event.stopPropagation(); copyUrl('https://www.efset.org/zht/');">複製 📋</button>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewport">
+        <div id="canvas">
+            <svg id="network-svg" viewBox="0 0 8000 6000">
+                <circle id="anchor-node-root" cx="4000" cy="3000" r="14" class="net-node-anchor" stroke="var(--gold-accent)" />
+<path id="line-node-part-1" class="net-line net-line-root" d="M 4000 3000 Q 3359.5 2322.5 2479 1925" />
+<circle id="anchor-node-part-1" cx="2479" cy="1925" r="10" class="net-node-anchor" stroke="var(--gold-accent)" />
+<path id="line-node-leaf-1-1" class="net-line net-line-branch" d="M 2479 1925 Q 1915.5 1507.5 1482 1220" />
+<circle id="anchor-node-leaf-1-1" cx="1482" cy="1220" r="8" class="net-node-anchor" stroke="var(--primary-neon)" />
+<path id="line-node-part-2" class="net-line net-line-root" d="M 4000 3000 Q 4368.0 2182.5 4976 1645" />
+<circle id="anchor-node-part-2" cx="4976" cy="1645" r="10" class="net-node-anchor" stroke="var(--gold-accent)" />
+<path id="line-node-part-3" class="net-line net-line-root" d="M 4000 3000 Q 4941.5 2978.5 6123 3237" />
+<circle id="anchor-node-part-3" cx="6123" cy="3237" r="10" class="net-node-anchor" stroke="var(--gold-accent)" />
+<path id="line-node-leaf-3-1" class="net-line net-line-branch" d="M 6123 3237 Q 6794.0 3369.5 7335 3372" />
+<circle id="anchor-node-leaf-3-1" cx="7335" cy="3372" r="8" class="net-node-anchor" stroke="var(--primary-neon)" />
+<path id="line-node-part-4" class="net-line net-line-root" d="M 4000 3000 Q 4048.0 3610.5 4336 4501" />
+<circle id="anchor-node-part-4" cx="4336" cy="4501" r="10" class="net-node-anchor" stroke="var(--gold-accent)" />
+<path id="line-node-leaf-4-1" class="net-line net-line-branch" d="M 4336 4501 Q 4534.0 5138.0 4602 5645" />
+<circle id="anchor-node-leaf-4-1" cx="4602" cy="5645" r="8" class="net-node-anchor" stroke="var(--primary-neon)" />
+<path id="line-node-part-5" class="net-line net-line-root" d="M 4000 3000 Q 3162.0 3205.0 2084 3690" />
+<circle id="anchor-node-part-5" cx="2084" cy="3690" r="10" class="net-node-anchor" stroke="var(--gold-accent)" />
+                <circle id="photon-comet" cx="4000" cy="3000" r="14" />
+            </svg>
+            <div id="node-root" class="node root" style="left: 4000px; top: 3000px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill">國家全額公費</span>
+        <h1>青年百億海外圓夢</h1>
+        <div class="node-subtitle">夢你來做・國家來搭 ｜ 15分鐘通關全攻略</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">國家全額買單｜</span>機票食宿保險全額公費補助</li><li><span class="bullet-lead">高中專屬賽道｜</span>15至18歲專屬不與大人競爭</li><li><span class="bullet-lead">打破學霸迷思｜</span>不看完美在校成績只看熱忱</li><li><span class="bullet-lead">通關三大關卡｜</span>書面企劃實體面試與行前培訓</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 高中職專屬國際賽道</div>
+      <div class="resource-links">
+        <div class="res-label">🔗 點擊開啟互動教材與外部資源：</div>
+        <div class="res-chip-group"><a href="https://twpathfinder.yda.gov.tw/" target="_blank" rel="noopener noreferrer" class="res-chip web" title="青年百億海外圓夢計畫官網" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>青年百億海外圓夢計畫官網</span> <span class="ext-arrow">↗</span></a><a href="https://www.yda.gov.tw/planList.aspx?uid=30329&amp;pid=83" target="_blank" rel="noopener noreferrer" class="res-chip web" title="教育部青年發展署計畫說明" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>教育部青年發展署計畫說明</span> <span class="ext-arrow">↗</span></a></div>
+    </div>
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="150" cy="110" r="86" fill="rgba(15,23,42,0.65)" stroke="#22d3ee" stroke-width="3"/>
+            <circle cx="150" cy="110" r="58" stroke="#22d3ee" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="6 4"/>
+            <circle cx="150" cy="110" r="30" stroke="#facc15" stroke-opacity="0.6" stroke-width="2"/>
+            <line x1="64" y1="110" x2="236" y2="110" stroke="#22d3ee" stroke-opacity="0.3" stroke-width="1.5"/>
+            <line x1="150" y1="24" x2="150" y2="196" stroke="#22d3ee" stroke-opacity="0.3" stroke-width="1.5"/>
+            <g class="svg-spin">
+                <path d="M 150 110 L 222 65 A 85 85 0 0 1 235 110 Z" fill="rgba(16,185,129,0.32)"/>
+                <line x1="150" y1="110" x2="222" y2="65" stroke="#10b981" stroke-width="3.5"/>
+            </g>
+            <circle cx="192" cy="76" r="7" fill="#facc15" stroke="#ffffff" stroke-width="2" class="svg-pulse"/>
+            <circle cx="112" cy="145" r="7" fill="#f43f5e" stroke="#ffffff" stroke-width="2" class="svg-pulse"/>
+            <circle cx="178" cy="152" r="6" fill="#22d3ee" stroke="#ffffff" stroke-width="2"/>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">100% 公費補助</div>
+        <div class="pod-metric-lbl">高中職專屬國際賽道</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-part-1" class="node part" style="left: 2479px; top: 1925px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill"><svg style="width:18px;height:18px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> 01 破局迷思</span>
+        <h2>打破我不夠神心魔</h2>
+        <div class="node-subtitle">高中職專屬公費出國賽道</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">國家全額買單｜</span>機票食宿保險全包零負擔</li><li><span class="bullet-lead">破除學霸迷思｜</span>不看完美在校成績只看熱忱</li><li><span class="bullet-lead">高中專屬席位｜</span>15至18歲獨立賽道保障出國</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 只看真實熱忱</div>
+      <div class="resource-links">
+        <div class="res-label">🔗 點擊開啟互動教材與外部資源：</div>
+        <div class="res-chip-group"><a href="https://twpathfinder.yda.gov.tw/about" target="_blank" rel="noopener noreferrer" class="res-chip web" title="青年百億海外圓夢計畫說明" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>青年百億海外圓夢計畫說明</span> <span class="ext-arrow">↗</span></a></div>
+    </div>
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 150 24 L 234 56 L 234 118 C 234 162 198 192 150 206 C 102 192 66 162 66 118 L 66 56 Z" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="3.5" class="svg-pulse"/>
+            <path d="M 150 42 L 214 67 L 214 115 C 214 149 186 173 150 185 C 114 173 86 149 86 115 L 86 67 Z" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 4"/>
+            <g fill="#facc15">
+                <circle cx="102" cy="96" r="8"/>
+                <circle cx="126" cy="82" r="9"/>
+                <circle cx="150" cy="74" r="11"/>
+                <circle cx="174" cy="82" r="9"/>
+                <circle cx="198" cy="96" r="8"/>
+            </g>
+            <path d="M 126 132 L 144 150 L 180 114" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="76" y1="115" x2="224" y2="115" stroke="#facc15" stroke-width="2.5" class="svg-scan"/>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">15~18 歲專屬</div>
+        <div class="pod-metric-lbl">只看真實熱忱</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-leaf-1-1" class="node leaf" style="left: 1482px; top: 1220px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill">語言迷思</span>
+        <h3>敢開口比分數重要</h3>
+        <div class="node-subtitle">打破英文門檻焦慮與快速補證</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">門檻視專案而定｜</span>多數海外專案多益450即可</li><li><span class="bullet-lead">溝通重於語法｜</span>敢跨文化對話才是評審核心</li><li><span class="bullet-lead">EF SET快速補證｜</span>線上50分鐘免費測驗發證</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 免費即測即證</div>
+      <div class="resource-links">
+        <div class="res-label">🔗 點擊開啟互動教材與外部資源：</div>
+        <div class="res-chip-group"><a href="https://www.efset.org/zht/" target="_blank" rel="noopener noreferrer" class="res-chip web" title="EF SET 官方線上免費測驗" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>EF SET 官方線上免費測驗</span> <span class="ext-arrow">↗</span></a></div>
+    </div>
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="svg-float">
+                <rect x="38" y="52" width="44" height="74" rx="22" fill="rgba(34,211,238,0.18)" stroke="#22d3ee" stroke-width="3.5"/>
+                <path d="M 26 92 C 26 126 94 126 94 92" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="60" y1="126" x2="60" y2="164" stroke="#22d3ee" stroke-width="3.5"/>
+                <line x1="40" y1="164" x2="80" y2="164" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+            <g class="svg-pulse">
+                <line x1="112" y1="88" x2="112" y2="132" stroke="#facc15" stroke-width="5" stroke-linecap="round"/>
+                <line x1="126" y1="66" x2="126" y2="154" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>
+                <line x1="140" y1="94" x2="140" y2="126" stroke="#22d3ee" stroke-width="5" stroke-linecap="round"/>
+                <line x1="154" y1="74" x2="154" y2="146" stroke="#c084fc" stroke-width="5" stroke-linecap="round"/>
+            </g>
+            <g class="svg-float" style="animation-delay:0.6s">
+                <rect x="174" y="56" width="102" height="108" rx="14" fill="rgba(250,204,21,0.15)" stroke="#facc15" stroke-width="3"/>
+                <polygon points="214,90 246,110 214,130" fill="#facc15"/>
+            </g>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">多益 450⇧</div>
+        <div class="pod-metric-lbl">免費即測即證</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-part-2" class="node part" style="left: 4976px; top: 1645px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill"><svg style="width:18px;height:18px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> 02 實戰案例</span>
+        <h2>泰國孔敬大學科研實戰</h2>
+        <div class="node-subtitle">熱帶野外採樣與全英學術發表</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">熱帶野外採樣｜</span>深入植物園進行多樣性調查</li><li><span class="bullet-lead">跨國雲端協作｜</span>與泰國學伴即時共編報告</li><li><span class="bullet-lead">全英成果發表｜</span>登上大學國際會議廳正式報告</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 正式登上國際會議廳</div>
+      <div class="resource-links">
+        <div class="res-label">🔗 點擊開啟互動教材與外部資源：</div>
+        <div class="res-chip-group"><a href="https://twpathfinder.yda.gov.tw/about_overseas" target="_blank" rel="noopener noreferrer" class="res-chip web" title="海外翱翔組計畫簡介" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>海外翱翔組計畫簡介</span> <span class="ext-arrow">↗</span></a></div>
+    </div>
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="18" y="42" width="74" height="136" rx="12" fill="rgba(34,211,238,0.14)" stroke="#22d3ee" stroke-width="3" class="svg-float"/>
+            <line x1="32" y1="74" x2="78" y2="74" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
+            <line x1="32" y1="96" x2="70" y2="96" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="55" cy="138" r="14" fill="#22d3ee" fill-opacity="0.35" stroke="#22d3ee" stroke-width="2.5"/>
+            <rect x="113" y="30" width="74" height="160" rx="14" fill="rgba(250,204,21,0.16)" stroke="#facc15" stroke-width="3" class="svg-pulse"/>
+            <circle cx="150" cy="96" r="22" stroke="#facc15" stroke-width="3.5"/>
+            <path d="M 142 96 L 148 103 L 161 88" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="128" y1="146" x2="172" y2="146" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
+            <rect x="208" y="42" width="74" height="136" rx="12" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="3" class="svg-float" style="animation-delay:0.6s"/>
+            <polygon points="245,70 265,106 225,106" fill="#10b981"/>
+            <rect x="225" y="124" width="40" height="28" rx="5" stroke="#10b981" stroke-width="2.5"/>
+            <path d="M 94 110 L 111 110" stroke="#ffffff" stroke-width="4" class="svg-dash"/>
+            <path d="M 189 110 L 206 110" stroke="#ffffff" stroke-width="4" class="svg-dash"/>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">跨國雲端協作</div>
+        <div class="pod-metric-lbl">正式登上國際會議廳</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-part-3" class="node part" style="left: 6123px; top: 3237px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill"><svg style="width:18px;height:18px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> 03 通關攻略</span>
+        <h2>步步為營穩健通關</h2>
+        <div class="node-subtitle">三大關卡全景圖與備戰指南</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">第一關書面企劃｜</span>提煉個人3大亮點經驗與動機</li><li><span class="bullet-lead">第二關實體面試｜</span>展現跨文化溝通抗壓與企圖心</li><li><span class="bullet-lead">第三關行前培訓｜</span>國際禮儀演練與團隊破冰協作</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 掌控評審核心視角</div>
+      
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="svg-float">
+                <rect x="38" y="36" width="102" height="136" rx="12" fill="rgba(34,211,238,0.16)" stroke="#22d3ee" stroke-width="3"/>
+                <rect x="54" y="54" width="46" height="20" rx="5" fill="#22d3ee"/>
+                <text x="77" y="68" fill="#080b11" font-size="11" font-weight="900" text-anchor="middle">DOCX</text>
+                <line x1="54" y1="92" x2="122" y2="92" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/>
+                <line x1="54" y1="114" x2="114" y2="114" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+                <line x1="54" y1="136" x2="102" y2="136" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <g class="svg-float" style="animation-delay:0.7s">
+                <rect x="160" y="48" width="102" height="136" rx="12" fill="rgba(16,185,129,0.16)" stroke="#10b981" stroke-width="3"/>
+                <rect x="176" y="66" width="46" height="20" rx="5" fill="#10b981"/>
+                <text x="199" y="80" fill="#080b11" font-size="11" font-weight="900" text-anchor="middle">XLSX</text>
+                <rect x="176" y="100" width="70" height="62" rx="4" stroke="#10b981" stroke-width="2"/>
+                <line x1="176" y1="120" x2="246" y2="120" stroke="#10b981" stroke-width="2"/>
+                <line x1="176" y1="140" x2="246" y2="140" stroke="#10b981" stroke-width="2"/>
+                <line x1="208" y1="100" x2="208" y2="162" stroke="#10b981" stroke-width="2"/>
+            </g>
+            <circle cx="150" cy="112" r="20" fill="#facc15" class="svg-pulse"/>
+            <path d="M 150 102 L 150 120 M 142 113 L 150 121 L 158 113" stroke="#080b11" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">3 大通關門檻</div>
+        <div class="pod-metric-lbl">掌控評審核心視角</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-leaf-3-1" class="node leaf" style="left: 7335px; top: 3372px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill">評審密碼</span>
+        <h3>企劃四大核心靈魂</h3>
+        <div class="node-subtitle">官方評審 STEP 1~4 核心規準</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">STEP 1 亮點經歷｜</span>精選3大經歷失敗亦是養分</li><li><span class="bullet-lead">STEP 2 組織深挖｜</span>說清非去該機構不可理由</li><li><span class="bullet-lead">STEP 3 點燃三感｜</span>呈現意義感成就感與樂趣感</li><li><span class="bullet-lead">STEP 4 效益量化｜</span>回饋分享場次受眾數字化</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 失敗經驗亦是養分</div>
+      
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 22 65 L 118 98" stroke="#f43f5e" stroke-width="3" stroke-dasharray="5 5"/>
+            <path d="M 22 110 L 115 110" stroke="#f43f5e" stroke-width="3" stroke-dasharray="5 5"/>
+            <path d="M 22 155 L 118 122" stroke="#f43f5e" stroke-width="3" stroke-dasharray="5 5"/>
+            <polygon points="145,42 198,172 92,172" fill="rgba(250,204,21,0.18)" stroke="#facc15" stroke-width="3.5" class="svg-pulse"/>
+            <rect x="208" y="54" width="72" height="112" rx="10" fill="rgba(16,185,129,0.16)" stroke="#10b981" stroke-width="3"/>
+            <line x1="208" y1="88" x2="280" y2="88" stroke="#10b981" stroke-width="2.5"/>
+            <line x1="208" y1="126" x2="280" y2="126" stroke="#10b981" stroke-width="2.5"/>
+            <line x1="238" y1="54" x2="238" y2="166" stroke="#10b981" stroke-width="2.5"/>
+            <line x1="174" y1="88" x2="208" y2="74" stroke="#22d3ee" stroke-width="3.5" class="svg-dash"/>
+            <line x1="182" y1="112" x2="208" y2="110" stroke="#10b981" stroke-width="3.5" class="svg-dash"/>
+            <line x1="190" y1="138" x2="208" y2="146" stroke="#facc15" stroke-width="3.5" class="svg-dash"/>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">4 大靈魂規準</div>
+        <div class="pod-metric-lbl">失敗經驗亦是養分</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-part-4" class="node part" style="left: 4336px; top: 4501px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill"><svg style="width:18px;height:18px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> 04 AI 外掛</span>
+        <h2>3秒解密厚重官方簡章</h2>
+        <div class="node-subtitle">打造超越90%競爭者的深度底氣</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">簡章直接拖入｜</span>將最新PDF官方簡章拖入解析</li><li><span class="bullet-lead">黃金提問引導｜</span>秒抓申請必備知識與評分標準</li><li><span class="bullet-lead">機構痛點深挖｜</span>直擊當地科研永續在地關鍵挑戰</li><li><span class="bullet-lead">台灣高中生連結｜</span>以在地視角展開深度國際對話</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 秒轉精確準備清單</div>
+      <div class="resource-links">
+        <div class="res-label">🔗 點擊開啟互動教材與外部資源：</div>
+        <div class="res-chip-group"><a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" class="res-chip web" title="NotebookLM 官方工具" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>NotebookLM 官方工具</span> <span class="ext-arrow">↗</span></a></div>
+    </div>
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="150" cy="110" r="92" stroke="#22d3ee" stroke-opacity="0.22" stroke-width="2" class="svg-spin"/>
+            <g class="svg-float">
+                <polygon points="85,52 128,76 128,144 85,168 42,144 42,76" fill="rgba(34,211,238,0.14)" stroke="#22d3ee" stroke-width="3"/>
+                <circle cx="85" cy="110" r="18" fill="#22d3ee" class="svg-pulse"/>
+                <line x1="85" y1="62" x2="85" y2="158" stroke="#22d3ee" stroke-width="2"/>
+                <line x1="48" y1="88" x2="122" y2="132" stroke="#22d3ee" stroke-width="2"/>
+            </g>
+            <g class="svg-float" style="animation-delay:0.8s">
+                <polygon points="215,52 258,76 258,144 215,168 172,144 172,76" fill="rgba(250,204,21,0.14)" stroke="#facc15" stroke-width="3"/>
+                <rect x="197" y="92" width="36" height="36" rx="6" fill="#facc15" class="svg-pulse"/>
+                <line x1="178" y1="110" x2="252" y2="110" stroke="#facc15" stroke-width="2"/>
+            </g>
+            <path d="M 128 96 Q 150 75 172 96" stroke="#10b981" stroke-width="3.5" class="svg-dash"/>
+            <path d="M 172 124 Q 150 145 128 124" stroke="#c084fc" stroke-width="3.5" class="svg-dash"/>
+            <circle cx="150" cy="110" r="10" fill="#ffffff" stroke="#10b981" stroke-width="3"/>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">省時 90%</div>
+        <div class="pod-metric-lbl">秒轉精確準備清單</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-leaf-4-1" class="node leaf" style="left: 4602px; top: 5645px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill">模擬特訓</span>
+        <h3>評審級陪跑實戰特訓</h3>
+        <div class="node-subtitle">AI 專屬教練雙向思考與高壓面試</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">挖掘真實動機｜</span>提問引導逼出獨特三感</li><li><span class="bullet-lead">把關審查規準｜</span>嚴格把關STEP 1-4量化指標</li><li><span class="bullet-lead">切換刁鑽評審｜</span>高壓模擬問答提前熟悉節奏</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 直擊邏輯死角</div>
+      
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="150" cy="112" r="76" stroke="#22d3ee" stroke-width="3" class="svg-dash"/>
+            <g class="svg-pulse">
+                <circle cx="150" cy="36" r="24" fill="#0f172a" stroke="#22d3ee" stroke-width="3"/>
+                <rect x="138" y="26" width="24" height="20" rx="4" stroke="#22d3ee" stroke-width="2.5"/>
+            </g>
+            <g class="svg-pulse" style="animation-delay:0.5s">
+                <circle cx="218" cy="152" r="24" fill="#0f172a" stroke="#facc15" stroke-width="3"/>
+                <path d="M 208 152 L 215 159 L 229 145" stroke="#facc15" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+            <g class="svg-pulse" style="animation-delay:1.0s">
+                <circle cx="82" cy="152" r="24" fill="#0f172a" stroke="#10b981" stroke-width="3"/>
+                <path d="M 72 146 H 92 V 160 H 80 L 73 165 Z" stroke="#10b981" stroke-width="2.5" stroke-linejoin="round"/>
+            </g>
+            <circle cx="150" cy="112" r="22" fill="rgba(250,204,21,0.2)" stroke="#facc15" stroke-width="2.5"/>
+            <text x="150" y="117" fill="#ffffff" font-size="13" font-weight="900" text-anchor="middle">1:1</text>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">1:1 答辯特訓</div>
+        <div class="pod-metric-lbl">直擊邏輯死角</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="node-part-5" class="node part" style="left: 2084px; top: 3690px;">
+  <div class="node-split-grid">
+    <div class="node-left-col">
+      <div class="node-header-group">
+        <span class="node-badge-pill"><svg style="width:18px;height:18px;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> 05 立即起跑</span>
+        <h2>世界很大等你出發</h2>
+        <div class="node-subtitle">國家全額買單・今晚啟動第一步</div>
+      </div>
+      <div class="node-body-group">
+        <ul class="node-bullets"><li><span class="bullet-lead">第一步下載簡章｜</span>挑出內心最心動的研究題目</li><li><span class="bullet-lead">第二步AI調研｜</span>跑NotebookLM與Deep調研</li><li><span class="bullet-lead">第三步快速測驗｜</span>完成免費EF SET帶企劃諮詢</li></ul>
+      </div>
+      <div class="leaf-highlight">✦ 今晚就啟動第一步</div>
+      <div class="resource-links">
+        <div class="res-label">🔗 點擊開啟互動教材與外部資源：</div>
+        <div class="res-chip-group"><a href="https://twpathfinder.yda.gov.tw/" target="_blank" rel="noopener noreferrer" class="res-chip web" title="青年百億海外圓夢計畫首頁" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>青年百億海外圓夢計畫首頁</span> <span class="ext-arrow">↗</span></a><a href="https://www.efset.org/zht/" target="_blank" rel="noopener noreferrer" class="res-chip web" title="EF SET 免費線上英文檢定" onclick="event.stopPropagation();"><svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span>EF SET 免費線上英文檢定</span> <span class="ext-arrow">↗</span></a></div>
+    </div>
+    </div>
+    <div class="node-right-pod">
+      <div class="svg-stage-box"><svg viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="svg-float">
+                <path d="M 106 44 H 194 V 96 C 194 126 174 146 150 146 C 126 146 106 126 106 96 Z" fill="rgba(250,204,21,0.2)" stroke="#facc15" stroke-width="3.5"/>
+                <path d="M 106 58 H 82 V 86 C 82 102 94 110 106 110" stroke="#facc15" stroke-width="3"/>
+                <path d="M 194 58 H 218 V 86 C 218 102 206 110 194 110" stroke="#facc15" stroke-width="3"/>
+                <line x1="150" y1="146" x2="150" y2="176" stroke="#facc15" stroke-width="4"/>
+                <rect x="114" y="176" width="72" height="14" rx="6" fill="#facc15"/>
+                <polygon points="154,64 136,96 152,96 144,126 168,90 152,90" fill="#22d3ee" class="svg-pulse"/>
+            </g>
+        </svg></div>
+      <div class="pod-metric-box">
+        <div class="pod-metric-val">3 步極速啟動</div>
+        <div class="pod-metric-lbl">今晚就啟動第一步</div>
+      </div>
+    </div>
+  </div>
+</div>
+        </div>
+    </div>
+
+    <div id="hud">
+        <button class="hud-btn" onclick="prevNode()" title="上一頁 (← / PageUp)">◀</button>
+        <span class="hud-info" id="hudTracker">0 / 0</span>
+        <button class="hud-btn" onclick="nextNode()" title="下一頁 (→ / PageDown / Space)">▶</button>
+        <button class="hud-btn" onclick="zoomOverview()" title="全景鳥瞰 (Esc)">⤢</button>
+        <button class="hud-btn" id="btnLaser" onclick="toggleLaser()" title="虛擬雷射筆 (L)">🔴</button>
+        <button class="hud-btn" id="btnMute" onclick="toggleMute()" title="切換音效靜音 (S)">🔊</button>
+        <button class="hud-btn" onclick="toggleTheme()" title="切換亮/暗主題 (T)">🌓</button>
+        <button class="hud-btn hud-btn-res" onclick="toggleResourcesModal()" title="查看所有外部影音與資源 (R)">🎬 外部資源</button>
+        <button class="hud-btn" onclick="toggleBlackout()" title="黑屏控場 (B)">◼</button>
+    </div>
+
+    <script id="nodes-data" type="application/json">
+[
+    {
+        "id": "node-root",
+        "title": "青年百億海外圓夢",
+        "x": 4000,
+        "y": 3000,
+        "w": 1180,
+        "h": 690,
+        "type": "root",
+        "partIdx": 0,
+        "parentId": null,
+        "ancestorLines": [],
+        "ancestorNodes": [
+            "node-root"
+        ]
+    },
+    {
+        "id": "node-part-1",
+        "title": "打破我不夠神心魔",
+        "x": 2479,
+        "y": 1925,
+        "w": 1080,
+        "h": 618,
+        "type": "part",
+        "partIdx": 1,
+        "parentId": "node-root",
+        "ancestorLines": [
+            "line-node-part-1"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-1"
+        ]
+    },
+    {
+        "id": "node-leaf-1-1",
+        "title": "敢開口比分數重要",
+        "x": 1482,
+        "y": 1220,
+        "w": 980,
+        "h": 618,
+        "type": "leaf",
+        "partIdx": 1,
+        "parentId": "node-part-1",
+        "ancestorLines": [
+            "line-node-part-1",
+            "line-node-leaf-1-1"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-1",
+            "node-leaf-1-1"
+        ]
+    },
+    {
+        "id": "node-part-2",
+        "title": "泰國孔敬大學科研實戰",
+        "x": 4976,
+        "y": 1645,
+        "w": 1080,
+        "h": 618,
+        "type": "part",
+        "partIdx": 2,
+        "parentId": "node-root",
+        "ancestorLines": [
+            "line-node-part-2"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-2"
+        ]
+    },
+    {
+        "id": "node-part-3",
+        "title": "步步為營穩健通關",
+        "x": 6123,
+        "y": 3237,
+        "w": 1080,
+        "h": 580,
+        "type": "part",
+        "partIdx": 3,
+        "parentId": "node-root",
+        "ancestorLines": [
+            "line-node-part-3"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-3"
+        ]
+    },
+    {
+        "id": "node-leaf-3-1",
+        "title": "企劃四大核心靈魂",
+        "x": 7335,
+        "y": 3372,
+        "w": 980,
+        "h": 602,
+        "type": "leaf",
+        "partIdx": 3,
+        "parentId": "node-part-3",
+        "ancestorLines": [
+            "line-node-part-3",
+            "line-node-leaf-3-1"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-3",
+            "node-leaf-3-1"
+        ]
+    },
+    {
+        "id": "node-part-4",
+        "title": "3秒解密厚重官方簡章",
+        "x": 4336,
+        "y": 4501,
+        "w": 1080,
+        "h": 690,
+        "type": "part",
+        "partIdx": 4,
+        "parentId": "node-root",
+        "ancestorLines": [
+            "line-node-part-4"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-4"
+        ]
+    },
+    {
+        "id": "node-leaf-4-1",
+        "title": "評審級陪跑實戰特訓",
+        "x": 4602,
+        "y": 5645,
+        "w": 980,
+        "h": 530,
+        "type": "leaf",
+        "partIdx": 4,
+        "parentId": "node-part-4",
+        "ancestorLines": [
+            "line-node-part-4",
+            "line-node-leaf-4-1"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-4",
+            "node-leaf-4-1"
+        ]
+    },
+    {
+        "id": "node-part-5",
+        "title": "世界很大等你出發",
+        "x": 2084,
+        "y": 3690,
+        "w": 1080,
+        "h": 618,
+        "type": "part",
+        "partIdx": 5,
+        "parentId": "node-root",
+        "ancestorLines": [
+            "line-node-part-5"
+        ],
+        "ancestorNodes": [
+            "node-root",
+            "node-part-5"
+        ]
+    }
+]
+    </script>
+
+    <script>
+        const nodesData = JSON.parse(document.getElementById('nodes-data').textContent);
+        const viewport = document.getElementById('viewport');
+        const canvas = document.getElementById('canvas');
+        const laserDot = document.getElementById('laser-dot');
+        const photonComet = document.getElementById('photon-comet');
+
+        const WORLD_W = 8000;
+        const WORLD_H = 6000;
+
+        let currentIndex = -1;
+        let isBlackout = false;
+        let hudVisible = true;
+        let resModalOpen = false;
+        let videoModalOpen = false;
+        let isMuted = false;
+        let isLaser = false;
+        let animFrameId = null;
+
+        let viewState = { tx: 0, ty: 0, scale: 0.16, wx: 4000, wy: 3000 };
+        const activePointers = new Map();
+        let isDragging = false;
+        let dragMoved = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let startTx = 0;
+        let startTy = 0;
+        let pinchStartDist = 0;
+        let pinchStartScale = 0.16;
+        let pinchCenterCanvasX = 0;
+        let pinchCenterCanvasY = 0;
+
+        // 100% Offline Web Audio API Synthesizer (Rich Chord & Swoosh)
+        let audioCtx = null;
+        function playClickSound(mode = 'nav') {
+            if (isMuted) return;
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return;
+                if (!audioCtx) audioCtx = new AudioContextClass();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (mode === 'overview') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(520, now);
+                    osc.frequency.exponentialRampToValueAtTime(260, now + 0.11);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+                    osc.start(now);
+                    osc.stop(now + 0.11);
+                } else {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.075);
+                    gain.gain.setValueAtTime(0.07, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+                    osc.start(now);
+                    osc.stop(now + 0.075);
+                }
+            } catch (e) {}
+        }
+
+        function cancelCameraAnim() {
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+            }
+            if (photonComet) {
+                photonComet.style.opacity = '0';
+            }
+        }
+
+        function applyTransformImmediate(tx, ty, scale, rotX = 0, rotY = 0) {
+            viewState.tx = tx;
+            viewState.ty = ty;
+            viewState.scale = scale;
+            const vpW = window.innerWidth;
+            const vpH = window.innerHeight;
+            viewState.wx = (vpW / 2 - tx) / scale;
+            viewState.wy = (vpH / 2 - ty) / scale;
+            canvas.style.transition = 'none';
+            if (Math.abs(rotX) > 0.02 || Math.abs(rotY) > 0.02) {
+                canvas.style.transform = `rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
+            } else {
+                canvas.style.transform = `translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
+            }
+        }
+
+        function easeInOutQuint(t) {
+            return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+        }
+
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        // 92% Full-Viewport Camera Fit accounting for Top Breadcrumb & Bottom HUD Safe Zones
+        function computeFocusTransform(x, y, w, h) {
+            const vpWidth = window.innerWidth;
+            const vpHeight = window.innerHeight;
+            const topSafe = hudVisible ? 64 : 16;
+            const botSafe = hudVisible ? 74 : 16;
+            const usableW = vpWidth * 0.92;
+            const usableH = Math.max(240, vpHeight - topSafe - botSafe) * 0.92;
+
+            const scaleX = usableW / w;
+            const scaleY = usableH / h;
+            let scale = Math.min(scaleX, scaleY);
+            scale = Math.max(0.24, Math.min(3.0, scale));
+
+            const centerY = topSafe + (vpHeight - topSafe - botSafe) / 2;
+            const tx = vpWidth / 2 - x * scale;
+            const ty = centerY - y * scale;
+            return { tx, ty, scale, wx: x, wy: y, centerY };
+        }
+
+        // 3-Layer Cinematic Parabolic Camera Flight + SVG Photon Pulse
+        function animateCameraFlight(target, prevNodeObj, nextNodeObj, activeLineEl) {
+            cancelCameraAnim();
+
+            const vpW = window.innerWidth;
+            const startScale = viewState.scale;
+            const endScale = target.scale;
+            const startCenterY = target.centerY || (window.innerHeight / 2);
+
+            const startWx = (vpW / 2 - viewState.tx) / startScale;
+            const startWy = (startCenterY - viewState.ty) / startScale;
+            const endWx = target.wx;
+            const endWy = target.wy;
+
+            const dist = Math.hypot(endWx - startWx, endWy - startWy);
+            if (dist < 10 && Math.abs(endScale - startScale) < 0.02) {
+                applyTransformImmediate(target.tx, target.ty, target.scale, 0, 0);
+                return;
+            }
+
+            const isLongFlight = dist > 2350;
+            const duration = isLongFlight ? 1080 : (dist > 600 ? 740 : 520);
+            const t0 = performance.now();
+
+            // Subtle perpendicular arc control point in world space
+            const dx = endWx - startWx;
+            const dy = endWy - startWy;
+            const perpX = -dy * 0.07;
+            const perpY = dx * 0.07;
+            const ctrlWx = (startWx + endWx) / 2 + perpX;
+            const ctrlWy = (startWy + endWy) / 2 + perpY;
+
+            let pathLen = 0;
+            if (activeLineEl && typeof activeLineEl.getTotalLength === 'function') {
+                try {
+                    pathLen = activeLineEl.getTotalLength();
+                    photonComet.style.opacity = '1';
+                } catch (e) {
+                    pathLen = 0;
+                }
+            }
+
+            function step(now) {
+                const rawU = Math.min(1.0, (now - t0) / duration);
+                const u = easeInOutQuint(rawU);
+
+                // Quadratic Bezier interpolation of camera focal point in world space
+                const invU = 1.0 - u;
+                const curWx = invU * invU * startWx + 2 * invU * u * ctrlWx + u * u * endWx;
+                const curWy = invU * invU * startWy + 2 * invU * u * ctrlWy + u * u * endWy;
+
+                // Parabolic altitude dip: pull out at mid-flight to reveal connecting network
+                let curScale;
+                const baseScale = startScale + (endScale - startScale) * u;
+                const sinBell = Math.sin(Math.PI * rawU);
+                if (isLongFlight) {
+                    const midAltitudeScale = Math.max(0.18, Math.min(startScale, endScale) * 0.46);
+                    curScale = baseScale * (1 - 0.58 * sinBell) + midAltitudeScale * (0.58 * sinBell);
+                } else {
+                    const dipRatio = Math.min(0.20, (dist / 2400) * 0.20);
+                    curScale = baseScale * (1.0 - dipRatio * sinBell);
+                }
+
+                // Subtle 3D banking during flight, settling to 0 at landing
+                const bankFactor = isLongFlight ? Math.sin(Math.PI * rawU) : 0;
+                const rotY = bankFactor * (dx >= 0 ? 2.2 : -2.2);
+                const rotX = bankFactor * (dy >= 0 ? -1.3 : 1.3);
+
+                const curTx = vpW / 2 - curWx * curScale;
+                const curTy = startCenterY - curWy * curScale;
+
+                applyTransformImmediate(curTx, curTy, curScale, rotX, rotY);
+
+                // Animate Photon Comet along the active SVG path
+                if (pathLen > 0 && activeLineEl) {
+                    try {
+                        const pt = activeLineEl.getPointAtLength(pathLen * easeOutCubic(rawU));
+                        photonComet.setAttribute('cx', pt.x);
+                        photonComet.setAttribute('cy', pt.y);
+                        photonComet.style.opacity = rawU < 0.92 ? '1' : String((1 - rawU) * 12);
+                    } catch (e) {}
+                }
+
+                if (rawU < 1.0) {
+                    animFrameId = requestAnimationFrame(step);
+                } else {
+                    applyTransformImmediate(target.tx, target.ty, target.scale, 0, 0);
+                    photonComet.style.opacity = '0';
+                    animFrameId = null;
+                }
+            }
+
+            animFrameId = requestAnimationFrame(step);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2300);
+        }
+
+        function copyUrl(url) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('已複製網址：' + url);
+                }).catch(() => {
+                    prompt('請手動複製網址：', url);
+                });
+            } else {
+                prompt('請手動複製網址：', url);
+            }
+        }
+
+        function openTheaterPopup(url, title) {
+            const w = Math.min(1024, Math.round(window.screen.availWidth * 0.72));
+            const h = Math.min(600, Math.round(w * 9 / 16) + 40);
+            const left = Math.round((window.screen.availWidth - w) / 2);
+            const top = Math.round((window.screen.availHeight - h) / 2);
+            const features = `popup=yes,width=${w},height=${h},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=no`;
+            const win = window.open(url, 'ZuiTheaterPopup', features);
+            if (!win) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+            } else {
+                win.focus();
+            }
+        }
+
+        function openVideoModal(ytId, title, rawUrl) {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('video-modal-iframe');
+            const nativeVid = document.getElementById('video-modal-native');
+            const titleEl = document.getElementById('video-modal-title');
+            const extBtn = document.getElementById('video-modal-ext');
+            const copyBtn = document.getElementById('video-modal-copy');
+            const pipBtn = document.getElementById('video-modal-pip');
+            const bannerPipBtn = document.getElementById('video-banner-pip');
+            const sandboxBanner = document.getElementById('video-sandbox-banner');
+
+            const fullUrl = rawUrl || (ytId ? `https://www.youtube.com/watch?v=${ytId}` : '#');
+            const popupTargetUrl = ytId
+                ? `https://www.youtube.com/watch?v=${ytId}`
+                : fullUrl;
+
+            titleEl.textContent = '🎬 ' + (title || '影片預覽');
+            extBtn.href = fullUrl;
+            copyBtn.onclick = () => copyUrl(fullUrl);
+            pipBtn.onclick = () => openTheaterPopup(popupTargetUrl, title);
+            bannerPipBtn.onclick = () => openTheaterPopup(popupTargetUrl, title);
+
+            const isLocalOrSandboxed = (
+                window.location.protocol === 'file:' ||
+                window.location.protocol === 'about:' ||
+                window.origin === 'null' ||
+                !window.location.hostname
+            );
+            sandboxBanner.style.display = (ytId && isLocalOrSandboxed) ? 'flex' : 'none';
+
+            if (!ytId && /\.(mp4|webm|ogg)(\?.*)?$/i.test(fullUrl)) {
+                iframe.style.display = 'none';
+                iframe.src = '';
+                nativeVid.style.display = 'block';
+                nativeVid.src = fullUrl;
+                nativeVid.play().catch(() => {});
+            } else if (ytId) {
+                nativeVid.style.display = 'none';
+                nativeVid.pause();
+                nativeVid.src = '';
+                iframe.style.display = 'block';
+                const originParam = (window.location.origin && window.location.origin !== 'null' && window.location.protocol.startsWith('http'))
+                    ? `&origin=${encodeURIComponent(window.location.origin)}`
+                    : '';
+                iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&playsinline=1${originParam}`;
+            } else {
+                openTheaterPopup(fullUrl, title);
+                return;
+            }
+
+            modal.classList.remove('hidden');
+            videoModalOpen = true;
+            playClickSound('nav');
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('video-modal-iframe');
+            const nativeVid = document.getElementById('video-modal-native');
+            iframe.src = '';
+            if (nativeVid) {
+                nativeVid.pause();
+                nativeVid.src = '';
+            }
+            modal.classList.add('hidden');
+            videoModalOpen = false;
+        }
+
+        function updateChapterHighlight(partIdx) {
+            document.querySelectorAll('.chapter-pill').forEach(btn => {
+                const bIdx = parseInt(btn.getAttribute('data-part-idx'), 10);
+                btn.classList.toggle('active', bIdx === partIdx);
+            });
+        }
+
+        function zoomOverview() {
+            const vpWidth = window.innerWidth;
+            const vpHeight = window.innerHeight;
+            const scale = Math.min(vpWidth / WORLD_W, vpHeight / WORLD_H) * 0.92;
+            const tx = (vpWidth - WORLD_W * scale) / 2;
+            const ty = (vpHeight - WORLD_H * scale) / 2;
+
+            animateCameraFlight(
+                { tx, ty, scale, wx: WORLD_W / 2, wy: WORLD_H / 2, centerY: vpHeight / 2 },
+                null,
+                null,
+                null
+            );
+
+            document.querySelectorAll('.node').forEach(el => {
+                el.classList.remove('active', 'ancestor-active');
+            });
+            document.querySelectorAll('.net-line').forEach(el => el.classList.remove('net-line-active'));
+            document.querySelectorAll('.net-node-anchor').forEach(el => el.classList.remove('net-anchor-active'));
+            currentIndex = -1;
+            updateChapterHighlight(-1);
+            updateHudTracker();
+            playClickSound('overview');
+        }
+
+        function navigateTo(index) {
+            if (index < 0 || index >= nodesData.length) return;
+            const prevNodeObj = currentIndex >= 0 ? nodesData[currentIndex] : null;
+            currentIndex = index;
+            const node = nodesData[currentIndex];
+            const el = document.getElementById(node.id);
+
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active', 'ancestor-active'));
+            document.querySelectorAll('.net-line').forEach(l => l.classList.remove('net-line-active'));
+            document.querySelectorAll('.net-node-anchor').forEach(a => a.classList.remove('net-anchor-active'));
+
+            let primaryLineEl = null;
+            if (el) {
+                // Force reflow so staggered CSS animations re-trigger cleanly
+                void el.offsetWidth;
+                el.classList.add('active');
+
+                const ancLines = node.ancestorLines || ["line-" + node.id];
+                ancLines.forEach(lid => {
+                    const lineEl = document.getElementById(lid);
+                    if (lineEl) {
+                        lineEl.classList.add('net-line-active');
+                        primaryLineEl = lineEl;
+                    }
+                });
+                (node.ancestorNodes || [node.id]).forEach(nid => {
+                    if (nid !== node.id) {
+                        const ancEl = document.getElementById(nid);
+                        if (ancEl) ancEl.classList.add('ancestor-active');
+                    }
+                    const ancCircle = document.getElementById('anchor-' + nid);
+                    if (ancCircle) ancCircle.classList.add('net-anchor-active');
+                });
+
+                const w = el.offsetWidth || node.w || 980;
+                const h = el.offsetHeight || node.h || 540;
+                const target = computeFocusTransform(node.x, node.y, w, h);
+                animateCameraFlight(target, prevNodeObj, node, primaryLineEl);
+                playClickSound('nav');
+            }
+            updateChapterHighlight(node.partIdx ?? 0);
+            updateHudTracker();
+        }
+
+        function jumpToNodeId(nodeId) {
+            const idx = nodesData.findIndex(n => n.id === nodeId);
+            if (idx !== -1) navigateTo(idx);
+        }
+
+        function nextNode() {
+            if (currentIndex + 1 < nodesData.length) {
+                navigateTo(currentIndex + 1);
+            } else {
+                zoomOverview();
+            }
+        }
+
+        function prevNode() {
+            if (currentIndex > 0) {
+                navigateTo(currentIndex - 1);
+            } else {
+                zoomOverview();
+            }
+        }
+
+        function updateHudTracker() {
+            const tracker = document.getElementById('hudTracker');
+            if (currentIndex === -1) {
+                tracker.textContent = `全景 / ${nodesData.length}`;
+            } else {
+                tracker.textContent = `${currentIndex + 1} / ${nodesData.length}`;
+            }
+        }
+
+        function startPresentation() {
+            document.getElementById('intro-overlay').classList.add('hidden');
+            navigateTo(0);
+        }
+
+        function toggleBlackout() {
+            isBlackout = !isBlackout;
+            document.getElementById('blackout').classList.toggle('active', isBlackout);
+        }
+
+        function toggleHud() {
+            hudVisible = !hudVisible;
+            document.getElementById('hud').classList.toggle('hidden', !hudVisible);
+            document.getElementById('chapter-bar').classList.toggle('hidden', !hudVisible);
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('btnMute');
+            btn.textContent = isMuted ? '🔇' : '🔊';
+            btn.classList.toggle('active-tool', isMuted);
+            showToast(isMuted ? '🔇 已切換為靜音演講模式' : '🔊 已開啟合成導覽音效');
+        }
+
+        function toggleLaser() {
+            isLaser = !isLaser;
+            document.body.classList.toggle('laser-mode', isLaser);
+            document.getElementById('btnLaser').classList.toggle('active-tool', isLaser);
+            showToast(isLaser ? '🔴 虛擬雷射筆已開啟 (按 L 關閉)' : '已關閉虛擬雷射筆');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            showToast(isLight ? '☀️ 已切換為明亮教室高對比主題' : '🌙 已切換為深邃霓虹舞台主題');
+        }
+
+        function toggleResourcesModal() {
+            resModalOpen = !resModalOpen;
+            document.getElementById('resources-modal').classList.toggle('hidden', !resModalOpen);
+        }
+
+        // Unified Pointer Events for Mouse Drag, Single-Touch Pan & Dual-Touch Pinch Zoom
+        viewport.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            if (e.target.closest('a') || e.target.closest('button')) return;
+
+            cancelCameraAnim();
+            activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+            if (activePointers.size === 1) {
+                isDragging = true;
+                dragMoved = false;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startTx = viewState.tx;
+                startTy = viewState.ty;
+            } else if (activePointers.size === 2) {
+                isDragging = false;
+                dragMoved = true;
+                const pts = Array.from(activePointers.values());
+                pinchStartDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                pinchStartScale = viewState.scale;
+                const midX = (pts[0].x + pts[1].x) / 2;
+                const midY = (pts[0].y + pts[1].y) / 2;
+                pinchCenterCanvasX = (midX - viewState.tx) / viewState.scale;
+                pinchCenterCanvasY = (midY - viewState.ty) / viewState.scale;
+            }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (isLaser) {
+                laserDot.style.left = e.clientX + 'px';
+                laserDot.style.top = e.clientY + 'px';
+            }
+            if (!activePointers.has(e.pointerId)) return;
+            activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+            if (activePointers.size === 1 && isDragging) {
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                if (Math.hypot(dx, dy) > 6) {
+                    dragMoved = true;
+                    viewport.classList.add('dragging');
+                    applyTransformImmediate(startTx + dx, startTy + dy, viewState.scale, 0, 0);
+                }
+            } else if (activePointers.size === 2 && pinchStartDist > 10) {
+                const pts = Array.from(activePointers.values());
+                const curDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                const ratio = curDist / pinchStartDist;
+                const newScale = Math.max(0.10, Math.min(3.0, pinchStartScale * ratio));
+                const midX = (pts[0].x + pts[1].x) / 2;
+                const midY = (pts[0].y + pts[1].y) / 2;
+                const newTx = midX - pinchCenterCanvasX * newScale;
+                const newTy = midY - pinchCenterCanvasY * newScale;
+                applyTransformImmediate(newTx, newTy, newScale, 0, 0);
+            }
+        });
+
+        function handlePointerUp(e) {
+            activePointers.delete(e.pointerId);
+            if (activePointers.size === 0) {
+                isDragging = false;
+                viewport.classList.remove('dragging');
+            } else if (activePointers.size === 1) {
+                const rem = Array.from(activePointers.values())[0];
+                isDragging = true;
+                dragStartX = rem.x;
+                dragStartY = rem.y;
+                startTx = viewState.tx;
+                startTy = viewState.ty;
+            }
+        }
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerUp);
+
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            cancelCameraAnim();
+            const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+            let newScale = viewState.scale * zoomFactor;
+            newScale = Math.max(0.10, Math.min(3.0, newScale));
+
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const canvasX = (mouseX - viewState.tx) / viewState.scale;
+            const canvasY = (mouseY - viewState.ty) / viewState.scale;
+
+            const newTx = mouseX - canvasX * newScale;
+            const newTy = mouseY - canvasY * newScale;
+
+            applyTransformImmediate(newTx, newTy, newScale, 0, 0);
+        }, { passive: false });
+
+        document.querySelectorAll('.node').forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (dragMoved) return;
+                if (e.target.closest('a') || e.target.closest('button')) return;
+                const idx = nodesData.findIndex(n => n.id === el.id);
+                if (idx !== -1) navigateTo(idx);
+            });
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (videoModalOpen) {
+                if (e.key === 'Escape' || e.key === 'Backspace') {
+                    e.preventDefault();
+                    closeVideoModal();
+                }
+                return;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                nextNode();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevNode();
+            } else if (e.key === 'Escape' || e.key === 'Backspace') {
+                e.preventDefault();
+                if (resModalOpen) {
+                    toggleResourcesModal();
+                } else {
+                    zoomOverview();
+                }
+            } else if (e.key === '0') {
+                e.preventDefault();
+                jumpToNodeId('node-root');
+            } else if (/^[1-8]$/.test(e.key)) {
+                e.preventDefault();
+                jumpToNodeId('node-part-' + e.key);
+            } else if (e.key === 'b' || e.key === '.') {
+                e.preventDefault();
+                toggleBlackout();
+            } else if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                toggleResourcesModal();
+            } else if (e.key === 't' || e.key === 'T') {
+                e.preventDefault();
+                toggleTheme();
+            } else if (e.key === 's' || e.key === 'S') {
+                e.preventDefault();
+                toggleMute();
+            } else if (e.key === 'l' || e.key === 'L') {
+                e.preventDefault();
+                toggleLaser();
+            } else if (e.key === 'm' || e.key === 'M') {
+                e.preventDefault();
+                toggleHud();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (currentIndex === -1) zoomOverview();
+            else navigateTo(currentIndex);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const vpW = window.innerWidth;
+            const vpH = window.innerHeight;
+            const initScale = Math.min(vpW / WORLD_W, vpH / WORLD_H) * 0.92;
+            applyTransformImmediate((vpW - WORLD_W * initScale) / 2, (vpH - WORLD_H * initScale) / 2, initScale, 0, 0);
+            updateHudTracker();
+        });
+    </script>
+</body>
+</html>
